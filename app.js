@@ -101,6 +101,36 @@ app.post('/todo', (req, res) => {
     );
 });
 
+// Endpoint: Actualizar un elemento por ID
+app.put('/todo/:id', (req, res) => {
+    const todoId = req.params.id;
+    const { name, description, status } = req.body;
+
+    // Verificar si el ID proporcionado es un número válido
+    if (isNaN(todoId)) {
+        return res.status(400).send({ success: false, error: 'ID debe ser un número válido' });
+    }
+
+    // Realizar la consulta para actualizar el elemento por ID
+    db.query(
+        'UPDATE todo SET name = ?, description = ?, status = ? WHERE id = ?',
+        [name, description, status, todoId],
+        (err, result) => {
+            if (err) {
+                console.error('Error al actualizar elemento:', err);
+                res.status(500).send({ success: false, error: 'Error interno del servidor' });
+            } else {
+                // Verificar si se encontraron resultados
+                if (result.affectedRows === 0) {
+                    res.status(404).send({ success: false, error: 'Elemento no encontrado' });
+                } else {
+                    res.send({ success: true, message: 'Elemento actualizado correctamente' });
+                }
+            }
+        }
+    );
+});
+
 // Endpoint: Eliminar un elemento por ID
 app.delete('/todo/:id', (req, res) => {
     const todoId = req.params.id;
